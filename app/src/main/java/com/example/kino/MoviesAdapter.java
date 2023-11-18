@@ -1,5 +1,7 @@
 package com.example.kino;
 
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -17,6 +20,16 @@ import java.util.List;
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
 
     private List<Movie> movies = new ArrayList<>();
+    private OnReachEndListener onReachEndListener;
+    private OnMovieClickListener onMovieClickListener;
+
+    public void setOnReachEndListener(OnReachEndListener onReachEndListener) {
+        this.onReachEndListener = onReachEndListener;
+    }
+
+    public void setOnMovieClickListener(OnMovieClickListener onMovieClickListener) {
+        this.onMovieClickListener = onMovieClickListener;
+    }
 
     public void setMovies(List<Movie> movies) {
         this.movies = movies;
@@ -36,16 +49,50 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
+        Log.d("MoviesAdapter", "onBindViewHolder " + position);
         Movie movie = movies.get(position);
         Glide.with(holder.itemView)
                 .load(movie.getPoster().getUrl())
                 .into(holder.imageViewPoster);
-        holder.textViewRating.setText(movie.getRating().getKinopoisk());
+        double rating = movie.getRating().getKinopoisk();
+        int drawbleID;
+        if (rating > 7) {
+            drawbleID = R.drawable.circle_green;
+        } else if (rating > 5) {
+            drawbleID = R.drawable.circle_orange;
+        } else {
+            drawbleID = R.drawable.circle_red;
+        }
+        Drawable background = ContextCompat.getDrawable(holder.itemView.getContext(), drawbleID);
+        holder.textViewRating.setBackground(background);
+//        holder.textViewRating.setText(String.valueOf(rating));
+        holder.textViewRating.setText(String.format("%.1f", rating));
+
+        if (position >= movies.size() - 10 && onReachEndListener != null) {
+            onReachEndListener.onReachEnd();
+        }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onMovieClickListener != null) {
+                    onMovieClickListener.onMovieClick(movie);
+                }
+            }
+        });
+
     }
 
     @Override
     public int getItemCount() {
         return movies.size();
+    }
+
+    interface OnReachEndListener {
+        void onReachEnd();
+    }
+
+    interface OnMovieClickListener {
+        void onMovieClick(Movie movie);
     }
 
     static class MovieViewHolder extends RecyclerView.ViewHolder {
