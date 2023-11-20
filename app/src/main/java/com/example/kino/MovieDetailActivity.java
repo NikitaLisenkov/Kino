@@ -8,11 +8,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 
-import io.reactivex.rxjava3.functions.Consumer;
-import io.reactivex.rxjava3.schedulers.Schedulers;
+import java.util.List;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
@@ -22,6 +23,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     private TextView textViewTitle;
     private TextView textViewYear;
     private TextView textViewDescription;
+    private DetailViewModel viewModel;
 
     public static Intent newIntent(Context context, Movie movie) {
         Intent intent = new Intent(context, MovieDetailActivity.class);
@@ -33,9 +35,10 @@ public class MovieDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
+        viewModel = new ViewModelProvider(this).get(DetailViewModel.class);
         initViews();
 
-        Movie movie = (Movie) getIntent().getSerializableExtra(Intent.EXTRA_INTENT);
+        Movie movie = (Movie) getIntent().getSerializableExtra(EXTRA_MOVIE);
 
         Glide.with(this)
                 .load(movie.getPoster().getUrl())
@@ -44,19 +47,13 @@ public class MovieDetailActivity extends AppCompatActivity {
         textViewYear.setText(String.valueOf(movie.getYear()));
         textViewDescription.setText(movie.getDescription());
 
-//        ApiFactory.apiServise.loadTrailers(movie.getId())
-//                .subscribeOn(Schedulers.io())
-//                .subscribe(new Consumer<TrailerResponce>() {
-//                    @Override
-//                    public void accept(TrailerResponce trailerResponce) throws Throwable {
-//                        Log.d(TAG, trailerResponce.toString());
-//                    }
-//                }, new Consumer<Throwable>() {
-//                    @Override
-//                    public void accept(Throwable throwable) throws Throwable {
-//                        Log.d(TAG, throwable.toString());
-//                    }
-//                });
+        viewModel.loadTraiersRx(movie.getId());
+        viewModel.getTrailers().observe(this, new Observer<List<Trailer>>() {
+            @Override
+            public void onChanged(List<Trailer> trailers) {
+                Log.d(TAG, trailers.toString());
+            }
+        });
     }
 
     private void initViews() {
