@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
@@ -24,6 +25,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     private TextView textViewYear;
     private TextView textViewDescription;
     private DetailViewModel viewModel;
+    private RecyclerView recyclerViewTrailers;
+    private TrailersAdapter trailersAdapter;
 
     public static Intent newIntent(Context context, Movie movie) {
         Intent intent = new Intent(context, MovieDetailActivity.class);
@@ -37,6 +40,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_detail);
         viewModel = new ViewModelProvider(this).get(DetailViewModel.class);
         initViews();
+        trailersAdapter = new TrailersAdapter();
+        recyclerViewTrailers.setAdapter(trailersAdapter);
 
         Movie movie = (Movie) getIntent().getSerializableExtra(EXTRA_MOVIE);
 
@@ -47,11 +52,12 @@ public class MovieDetailActivity extends AppCompatActivity {
         textViewYear.setText(String.valueOf(movie.getYear()));
         textViewDescription.setText(movie.getDescription());
 
-        viewModel.loadTraiersRx(movie.getId());
+        viewModel.loadTrailersRx(movie.getId());
         viewModel.getTrailers().observe(this, new Observer<List<Trailer>>() {
             @Override
             public void onChanged(List<Trailer> trailers) {
-                Log.d(TAG, trailers.toString());
+//                Log.d(TAG, trailers.toString());
+                trailersAdapter.setTrailers(trailers);
             }
         });
     }
@@ -61,5 +67,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         textViewTitle = findViewById(R.id.textViewTitle);
         textViewYear = findViewById(R.id.textViewYear);
         textViewDescription = findViewById(R.id.textViewDescription);
+        recyclerViewTrailers = findViewById(R.id.recyclerViewTrailers);
     }
 }
