@@ -23,6 +23,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     private OnReachEndListener onReachEndListener;
     private OnMovieClickListener onMovieClickListener;
 
+
     public void setOnReachEndListener(OnReachEndListener onReachEndListener) {
         this.onReachEndListener = onReachEndListener;
     }
@@ -51,35 +52,13 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
         Log.d("MoviesAdapter", "onBindViewHolder " + position);
         Movie movie = movies.get(position);
-        Glide.with(holder.itemView)
-                .load(movie.getPoster().getUrl())
-                .into(holder.imageViewPoster);
-        double rating = movie.getRating().getKinopoisk();
-        int drawbleID;
-        if (rating > 7) {
-            drawbleID = R.drawable.circle_green;
-        } else if (rating > 5) {
-            drawbleID = R.drawable.circle_orange;
-        } else {
-            drawbleID = R.drawable.circle_red;
-        }
-        Drawable background = ContextCompat.getDrawable(holder.itemView.getContext(), drawbleID);
-        holder.textViewRating.setBackground(background);
-//        holder.textViewRating.setText(String.valueOf(rating));
-        holder.textViewRating.setText(String.format("%.1f", rating));
-
-        if (position >= movies.size() - 10 && onReachEndListener != null) {
-            onReachEndListener.onReachEnd();
-        }
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (onMovieClickListener != null) {
-                    onMovieClickListener.onMovieClick(movie);
-                }
-            }
-        });
-
+        holder.bind(
+                movie,
+                position,
+                movies.size(),
+                onReachEndListener,
+                onMovieClickListener
+        );
     }
 
     @Override
@@ -104,6 +83,42 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             super(itemView);
             imageViewPoster = itemView.findViewById(R.id.imageViewPoster);
             textViewRating = itemView.findViewById(R.id.textViewRating);
+        }
+
+        public void bind(
+                Movie movie,
+                int position,
+                int size,
+                OnReachEndListener onReachEndListener,
+                OnMovieClickListener onMovieClickListener
+        ) {
+            Glide.with(itemView)
+                    .load(movie.getPoster().getUrl())
+                    .into(imageViewPoster);
+            double rating = movie.getRating().getKinopoisk();
+            int drawbleID;
+            if (rating > 7) {
+                drawbleID = R.drawable.circle_green;
+            } else if (rating > 5) {
+                drawbleID = R.drawable.circle_orange;
+            } else {
+                drawbleID = R.drawable.circle_red;
+            }
+            Drawable background = ContextCompat.getDrawable(itemView.getContext(), drawbleID);
+            textViewRating.setBackground(background);
+            textViewRating.setText(String.format("%.1f", rating));
+
+            if (position >= size - 10 && onReachEndListener != null) {
+                onReachEndListener.onReachEnd();
+            }
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onMovieClickListener != null) {
+                        onMovieClickListener.onMovieClick(movie);
+                    }
+                }
+            });
         }
     }
 }

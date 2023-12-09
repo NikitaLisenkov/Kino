@@ -10,9 +10,10 @@ public interface ApiServise {
     Single<MovieResponse> loadMovies(
             @Query("page") int page);
 
-//    @GET("movie/{idFilms}?token=ZJKVHXQ-AERMNTP-PBRP71B-VZE6TSH")
-//    Single<TrailerResponce> loadTrailers(@Path("idFilms") int idFilms);
+    @GET("movie/{ID}?token=ZJKVHXQ-AERMNTP-PBRP71B-VZE6TSH")
+    Single<TrailerResponce> loadTrailers(@Path("ID") int id);
 
-    @GET("v1.3/movie/{ID}?token=ZJKVHXQ-AERMNTP-PBRP71B-VZE6TSH")
-    Single<TrailerResponce> loadTrailers(@Path ("ID") int id);
+    @GET("review?token=ZJKVHXQ-AERMNTP-PBRP71B-VZE6TSH")
+    Single<ReviewResponse> loadReviews(
+            @Query("movieId") int id);
 }
